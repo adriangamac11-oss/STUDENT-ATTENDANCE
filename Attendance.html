@@ -197,6 +197,10 @@ document.querySelectorAll('.component-tab').forEach(tab => {
   tab.addEventListener('click', () => setComponent(tab.getAttribute('data-component'))); 
 });
 
+.stat-updated { animation: pulse 0.5s ease; }
+@keyframes slideInRight { 0% { transform: translateX(100%); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+.stat-updated h2 { color: #28a745 !important; }
+    
 window.onload = function() { 
   setTimeout(() => { 
     if(document.getElementById("loginPage").style.display !== "none") 
