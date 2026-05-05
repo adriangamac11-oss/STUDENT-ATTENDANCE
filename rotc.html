@@ -373,7 +373,57 @@ function showLoading(show){ document.getElementById("loadingIndicator").style.di
 function showMessage(msg,success){ let d=document.getElementById("loginStatusMessage"); d.innerHTML=msg; d.style.backgroundColor=success?"#d4edda":"#f8d7da"; d.style.color=success?"#155724":"#721c24"; d.style.display="block"; setTimeout(()=>d.style.display="none",3000); }
 function showScanStatus(msg,success){ let div=document.getElementById("scanStatus"); div.innerHTML=msg; div.style.backgroundColor=success?"#d4edda":"#f8d7da"; div.style.padding="10px"; div.style.borderRadius="30px"; setTimeout(()=>div.innerHTML="",3000); }
 function showRealtimeStatus(){ showMessage(`🟢 Real-time active. Last update: ${document.getElementById("lastUpdateTime").innerHTML}`, true); }
-function logout(){ if(confirm("Logout?")){ stopRealtimeUpdates(); location.reload(); } }
+
+// ========== REAL-TIME FUNCTIONS (COMPLETE & FIXED) ==========
+function startRealtimeUpdates() { 
+  if(realtimeInterval) clearInterval(realtimeInterval); 
+  realtimeInterval = setInterval(checkForUpdates, 2000); 
+  console.log("🔄 Real-time updates started"); 
+}
+
+function stopRealtimeUpdates() { 
+  if(realtimeInterval) { 
+    clearInterval(realtimeInterval); 
+    realtimeInterval = null; 
+    console.log("✅ Real-time updates stopped"); 
+  } 
+}
+
+function checkForUpdates() { 
+  let ca = JSON.parse(localStorage.getItem("attendance")) || [], 
+      cs = JSON.parse(localStorage.getItem("students")) || []; 
+  let nah = JSON.stringify(ca), nsh = JSON.stringify(cs); 
+  if(nah !== lastAttendanceHash) { 
+    attendance = ca; 
+    lastAttendanceHash = nah; 
+    renderAttendance(); 
+    updateStats(); 
+    if(attendanceChart) updateChart(); 
+    updateLastUpdateTime(); 
+    updateComponentSummary(); 
+  } 
+  if(nsh !== lastStudentsHash) { 
+    students = cs; 
+    lastStudentsHash = nsh; 
+    renderStudents(); 
+    updateStats(); 
+    updateNSTPStats(); 
+    updateComponentSummary(); 
+  } 
+}
+
+// FIXED: Complete logout function
+function logout() { 
+  if(confirm("Are you sure you want to logout?")) { 
+    stopRealtimeUpdates(); 
+    currentRole = null; 
+    currentUserID = null; 
+    currentStudentData = null; 
+    showMessage("👋 Goodbye! Returning to login...", true);
+    setTimeout(() => location.reload(), 1500); 
+  } 
+}
+  
 function escapeHtml(t){ if(!t) return ''; return t.replace(/[&<>]/g, m=> m==='&'?'&amp;': m==='<'?'&lt;':'&gt;'); }
 
 document.querySelectorAll('.component-tab').forEach(tab => { tab.addEventListener('click', () => setComponent(tab.getAttribute('data-component'))); });
