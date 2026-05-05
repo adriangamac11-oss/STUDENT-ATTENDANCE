@@ -375,6 +375,56 @@ function showRealtimeStatus(){ showMessage(`🟢 Real-time active. Last update: 
 function logout(){ if(confirm("Logout?")){ stopRealtimeUpdates(); location.reload(); } }
 function escapeHtml(t){ if(!t) return ''; return t.replace(/[&<>]/g, m=> m==='&'?'&amp;': m==='<'?'&lt;':'&gt;'); }
 
+
+function startRealtimeUpdates() { 
+  if(realtimeInterval) clearInterval(realtimeInterval); 
+  realtimeInterval = setInterval(checkForUpdates, 2000); 
+  console.log("🔄 Real-time updates started"); 
+}
+
+function stopRealtimeUpdates() { 
+  if(realtimeInterval) { 
+    clearInterval(realtimeInterval); 
+    realtimeInterval = null; 
+    console.log("✅ Real-time updates stopped"); 
+  } 
+}
+
+function checkForUpdates() { 
+  let ca = JSON.parse(localStorage.getItem("attendance")) || [], 
+      cs = JSON.parse(localStorage.getItem("students")) || []; 
+  let nah = JSON.stringify(ca), nsh = JSON.stringify(cs); 
+  if(nah !== lastAttendanceHash) { 
+    attendance = ca; 
+    lastAttendanceHash = nah; 
+    renderAttendance(); 
+    updateStats(); 
+    if(attendanceChart) updateChart(); 
+    updateLastUpdateTime(); 
+    updateComponentSummary(); 
+  } 
+  if(nsh !== lastStudentsHash) { 
+    students = cs; 
+    lastStudentsHash = nsh; 
+    renderStudents(); 
+    updateStats(); 
+    updateNSTPStats(); 
+    updateComponentSummary(); 
+  } 
+}
+
+
+function logout() { 
+  if(confirm("Are you sure you want to logout?")) { 
+    stopRealtimeUpdates(); 
+    currentRole = null; 
+    currentUserID = null; 
+    currentStudentData = null; 
+    showMessage("👋 Goodbye! Returning to login...", true);
+    setTimeout(() => location.reload(), 1500); 
+  } 
+}
+  
 document.querySelectorAll('.component-tab').forEach(tab => { tab.addEventListener('click', () => setComponent(tab.getAttribute('data-component'))); });
 loadAllData();
 window.onload = function() { setTimeout(() => { if(document.getElementById("loginPage").style.display !== "none") startLoginScanner(); }, 1000); };
